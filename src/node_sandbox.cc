@@ -100,6 +100,7 @@ namespace node {
 
 		void after_recieveWork(uv_work_t *req, int status) {
 			Sandbox_req *data = ((struct Sandbox_req*)req->data);
+			HandleScope scope(data->isolate);
 			Local<Function> callback_fn = Local<Function>::New(data->isolate, pfn);
 			Handle<String> response_str = String::NewFromUtf8(data->isolate, data->data.c_str(), String::kNormalString, data->data.size());
 			Handle<Object> response = jsonParse(data->isolate, response_str);
@@ -155,6 +156,7 @@ namespace node {
 
 		void after_findCallback(uv_work_t *req, int status) {
 			Sandbox_req *data = ((struct Sandbox_req*)req->data);
+			HandleScope scope(data->isolate);
 			Handle<String> response_str = String::NewFromUtf8(data->isolate, data->data.c_str(), String::kNormalString, data->data.size());
 			Handle<Object> response = jsonParse(data->isolate, response_str);
 
@@ -227,6 +229,7 @@ namespace node {
 
 				Isolate *isolate = Isolate::GetCurrent();
 				Environment *env = Environment::GetCurrent(isolate->GetCurrentContext());
+			  HandleScope scope(isolate);
 
 				for (vector<int>::size_type i = 0; i != jsonObjects.size() - 1; i++) {
 					Handle<String> message = String::NewFromUtf8(env->isolate(), jsonObjects[i].c_str(), String::kNormalString, jsonObjects[i].size());
@@ -414,6 +417,7 @@ namespace node {
 		//////////
 
 		Handle<Object> jsonParse(Isolate* isolate, Handle<String> input) {
+			HandleScope scope(isolate);
 			Local<Object> global = isolate->GetCurrentContext()->Global();
 
 			/*Local<Function> decodeURIComponent = Handle<Function>::Cast(global->Get(String::NewFromUtf8(isolate, "decodeURIComponent")));
@@ -437,6 +441,8 @@ namespace node {
 		}
 
 		uint8_t* jsonStringify(Isolate* isolate, Handle<Object> input) {
+			HandleScope scope(isolate);
+
 			Local<Object> global = isolate->GetCurrentContext()->Global();
 			Local<Object> JSON = global->Get(String::NewFromUtf8(isolate, "JSON"))->ToObject();
 
